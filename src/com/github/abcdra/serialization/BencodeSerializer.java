@@ -40,7 +40,7 @@ public class BencodeSerializer {
         if(list.get(0) instanceof Map<?,?>) {
             List<String> arr = new ArrayList<>();
             try {
-                list.forEach(v->arr.add(serialize((Map<String, ?>) v)) );
+                list.forEach(v->arr.add(serialize((Map<String, Object>) v)) );
             } catch (ClassCastException ex) {
                 System.err.println("Cast failed " + ex.getMessage());
                 return "le";
@@ -68,24 +68,25 @@ public class BencodeSerializer {
             return new BencodeDict(bDict).value();
         }
         if(dict.get(testKey) instanceof List<?>) {
-            List<String> arr = new ArrayList<>();
-            dict.forEach((k,v)->arr.add(serialize(k)+serialize((List<?>) v)));
-            StringBuilder acc = new StringBuilder("d");
-            arr.forEach(acc::append);
-            return acc.toString()+"e";
+            Map<BencodeString, BencodeType> bDict = new HashMap<>();
+            dict.forEach((k,v)-> {
+                String serializedList = serialize((List<?>) v);
+                bDict.put(new BencodeString(k), new BencodeRaw(serializedList));
+            });
+
+            return new BencodeDict(bDict).value();
         }
         if(dict.get(testKey) instanceof Map<?,?>) {
+            Map<BencodeString, BencodeType> bDict = new HashMap<>();
             try {
-                Map<String,?> subKeyMap = (Map<String, ?>) dict.get(testKey);
-                List<String> arr = new ArrayList<>();
-                dict.forEach((k,v)->arr.add(serialize(k)+serialize((Map<String,?>) v)));
-                StringBuilder acc = new StringBuilder("d");
-                arr.forEach(acc::append);
-                return acc.toString()+"e";
-            } catch (ClassCastException exception) {
-                System.err.println("Incorrect sub dictionary type, Недопустимый подсловарь!");
-                return "de";
+                dict.forEach((k,v)-> {
+                    String serializedDict = serialize((Map<String,?>) v);
+                    bDict.put(new BencodeString(k), new BencodeRaw(serializedDict));
+                });
+            } catch (ClassCastException ex) {
+                System.err.println("Cast failed" + ex.getMessage());
             }
+            return new BencodeDict(bDict).value();
         }
         return "de";
     }

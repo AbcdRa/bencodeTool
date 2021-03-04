@@ -31,6 +31,7 @@ public class BencodeSenderImp implements BencodeSender{
                 // Отправка данных на сервер
                 toServer.println(content.value());
             } catch (Exception ex) {
+                System.err.println("Данный хост " + host +" не принимает данные!");
                 System.err.println(ex.getMessage());
             }
         } catch (IOException ex) {

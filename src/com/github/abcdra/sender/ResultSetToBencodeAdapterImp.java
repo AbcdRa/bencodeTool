@@ -38,6 +38,8 @@ public class ResultSetToBencodeAdapterImp implements ResultSetToBencodeAdapter{
         return new BencodeString("Error");
     }
 
+
+    //Преобразует resultSet в лист, с которым удобней работать
     private List<List<Object>> asList(ResultSet resultSet) throws SQLException {
         List<List<Object>> list = new ArrayList<>();
         ResultSetMetaData metaData = resultSet.getMetaData();
@@ -56,6 +58,7 @@ public class ResultSetToBencodeAdapterImp implements ResultSetToBencodeAdapter{
         return list;
     }
 
+    //Возвращает список типов столбцов
     private List<String> getTypes(ResultSetMetaData metaData) throws SQLException {
         List<String> list = new ArrayList<>();
         for (var i=1; i<=metaData.getColumnCount(); i++) {
@@ -64,6 +67,7 @@ public class ResultSetToBencodeAdapterImp implements ResultSetToBencodeAdapter{
         return list;
     }
 
+    //Возвращает список имен столбцов
     private List<String> getColumnNames(ResultSetMetaData metaData) throws SQLException {
         List<String> list = new ArrayList<>();
         for (var i=1; i<=metaData.getColumnCount(); i++) {
@@ -73,8 +77,11 @@ public class ResultSetToBencodeAdapterImp implements ResultSetToBencodeAdapter{
     }
 
 
+    //Преобразует одну строчку в bencode словарь
     private BencodeDict row2BencodeDict(List<Object> list,List<String> types,List<String> names) {
         Map<BencodeString,BencodeType> dict = new HashMap<>();
+
+        //Поддерживается только 3 типа, но это самые распространенные
         for (var i=0; i<list.size();i++) {
             if(types.get(i).equals("INT")) {
                 dict.put(new BencodeString(names.get(i)),new BencodeNumber((Number) list.get(i)));
